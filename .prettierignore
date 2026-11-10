@@ -1,0 +1,8 @@
+dist
+node_modules
+.art
+package-lock.json
+
+# The prose is hand-wrapped and deliberately worded. Reflowing tables and
+# swapping *emphasis* for _emphasis_ costs readability and gains nothing.
+*.md

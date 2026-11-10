@@ -1,0 +1,52 @@
+name: Copilot Setup Steps
+
+# Install the tools needed for full verification, including real browser shots.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # The job MUST be named copilot-setup-steps or the Copilot cloud agent ignores it.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve Chrome
+        run: |
+          set -euo pipefail
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "CHROME_BIN=google-chrome" >> "$GITHUB_ENV"
+            google-chrome --version
+          elif command -v chromium >/dev/null 2>&1; then
+            echo "CHROME_BIN=chromium" >> "$GITHUB_ENV"
+            chromium --version
+          else
+            echo "::error::Neither google-chrome nor chromium is available; npm run shot needs a headless Chrome binary."
+            exit 1
+          fi
+
+      - name: Print tool versions
+        run: |
+          set -euo pipefail
+          node --version
+          "$CHROME_BIN" --version
